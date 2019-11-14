@@ -1,90 +1,77 @@
 # Lab instructions
 
-## Raw
+## Deploying to Kubernetes with Jenkins Pipelines
 
-Deploying to Kubernetes with Jenkins Pipelines
-Introduction
-Jenkins Pipelines provides a powerful way to implement a continuous delivery process, and Kubernetes provides incredible benefits in the management and orchestration of containers. In this learning activity, you will learn how to leverage both of these technologies together. You will integrate a Jenkins pipeline with Kubernetes orchestration by deploying to Kubernetes as part of a Jenkins pipeline.
 
-Set up the train-schedule Project in Jenkins and Successfully Build It
-Fork the GitHub Repository
-Open the following link in a new tab in your browser:
+### Introduction
+- Jenkins Pipelines provides a powerful way to implement a continuous delivery process, and Kubernetes provides incredible benefits in the management and orchestration of containers. In this learning activity, you will learn how to leverage both of these technologies together. You will integrate a Jenkins pipeline with Kubernetes orchestration by deploying to Kubernetes as part of a Jenkins pipeline.
 
-https://github.com/linuxacademy/cicd-pipeline-train-schedule-kubernetes
-Click Fork in the top-right of the page.
+- On the hands-on lab page, locate the Jenkins Server Public IP and copy it to your clipboard. 
+- Open a new tab in your browser and paste the IP address, followed by the port number 8080:`<JENKINS_SERVER_PUBLIC_IP>;:8080`
+- Using this same IP address, open a terminal window to connect to the server using SSH:`ssh cloud_user@<JENKINS_SERVER_PUBLIC_IP>;`
+- We need to show the password for the admin user to log in to our Jenkins web interface:
 
-On the hands-on lab page, locate the Jenkins Server Public IP and copy it to your clipboard. Open a new tab in your browser and paste the IP address, followed by the port number 8080:
+`sudo cat /var/lib/jenkins/secrets/initialAdminPassword`
+- Copy the string that is output and paste it into the Administrator password field in your browser. Click Continue.
 
-<JENKINS_SERVER_PUBLIC_IP>;:8080
-Using this same IP address, open a terminal window to connect to the server using SSH:
-
-ssh cloud_user@<JENKINS_SERVER_PUBLIC_IP>;
-We need to show the password for the admin user to log in to our Jenkins web interface:
-
-sudo cat /var/lib/jenkins/secrets/initialAdminPassword
-Copy the string that is output and paste it into the Administrator password field in your browser. Click Continue.
-
-For the Create First Admin User form, provide the following information:
+- For the Create First Admin User form, provide the following information:
 
 Username: jenkins
 Password: random
 Confirm password: random
 Full name: jenkins
-Email address: noreply@linuxacademy.com
-Click Save and continue. Next, click Start using Jenkins.
+Email address: test@test.com
+- Click Save and continue. Next, click Start using Jenkins.
 
 Add Docker Hub Credentials in Jenkins
 Click Credentials in the menu on the left of the page and then click global. Click Add Credentials in the menu on the left of the page. Provide the following information:
 
 Note: You will need a DockerHub account for this step.
-
+```
 Username: Provide your DockerHub username
 Password: Provide your DuckerHub password
 ID: docker_hub_login
 Description: Docker Hub Login
-Click OK.
+```
+- Click OK.
+- Click Add Credentials in the menu on the left of the page.
 
-Click Add Credentials in the menu on the left of the page.
-
-Add GitHub Credentials in Jenkins
-We will use a GitHub API token for the next step. Navigate to the GitHub tab in your browser. Click your profile picture in the top right of the page, click Settings, click Developer settings, click Personal access tokens, and finally click Generate new token.
-
-Name this token "jenkins" and be sure to click the checkbox next to admin:repo_hook. Click Generate token at the bottom of the page. Copy the token to your clipboard.
-
-Back in the Jenkins tab in your browser, add your GitHub information as follows:
-
+- Back in the Jenkins tab in your browser, add your GitHub information as follows:
+```
 Username: Provide your GitHub username
 Password: Paste the API token from your clipboard.
 ID: github_key
 Description: GitHub Key
-Click OK.
+```
+- Click OK.
 
-Add the Kubeconfig from the Kubernetes master as a credential in Jenkins
-We will need to view the contents of our Kubeconfig for this step. Log in to the Kubernetes master node by navigating to the hands-on lab page, copying the Kubernetes Master Public IP, and using the credentials for that instance to log in via SSH:
+- Add the Kubeconfig from the Kubernetes master as a credential in Jenkins
+- We will need to view the contents of our Kubeconfig for this step. Log in to the Kubernetes master node by navigating to the hands-on lab page, copying the Kubernetes Master Public IP, and using the credentials for that instance to log in via SSH:
 
-ssh cloud_user@<KUBERNETES_MASTER_PUBLIC_IP>;
-Next, display the contents of our Kubeconfig:
+`ssh cloud_user@<KUBERNETES_MASTER_PUBLIC_IP>;`
+- Next, display the contents of our Kubeconfig:
 
-cat ~/.kube/config
-Copy the output of this file to your clipboard. We will need to paste this into Jenkins, so navigate back to the Jenkins tab in your browser.
+`cat ~/.kube/config`
+- Copy the output of this file to your clipboard. We will need to paste this into Jenkins, so navigate back to the Jenkins tab in your browser.
 
-Click Add Credentials in the menu on the left of the page.
+- Click Add Credentials in the menu on the left of the page.
 
-Add credentials with the following information:
-
+- Add credentials with the following information:
+```
 Kind: Kubernetes configuration (kubeconfig)
 ID: kubeconfig
 Description: Kubeconfig
 Kubeconfig: Enter directly
 Content: Paste the contents of ~/.kube/config
-Click OK.
+```
+- Click OK.
 
-Create a Jenkins project called train-schedule and successfully run the build from your GitHub fork
-Navigate to the Jenkins home page and click New Item in the menu on the left of the page.
+- Create a Jenkins project called train-schedule and successfully run the build from your GitHub fork
+- Navigate to the Jenkins home page and click New Item in the menu on the left of the page.
 
-The name of our project will be "train-schedule" and it will be a Multibranch Pipeline.
+- The name of our project will be "train-schedule" and it will be a Multibranch Pipeline.
 
-Click OK.
+- Click OK.
 
 Under Branch Sources, click Add source and then select GitHub. For the new source, provide the following information:
 
@@ -98,7 +85,7 @@ Click train-schedule in the menu at the top of the page. Click master to display
 Successfully deploy the train-schedule app to the Kubernetes cluster via the Jenkins pipeline
 Create a Kubernetes template file defining a Service and Deployment for the app
 Back in the GitHub tab in your browser, click Create new file. Name this file "train-schedule-kube.yml". Insert the following YAML as the contents of the new file:
-
+```
 kind: Service
 apiVersion: v1
 metadata:
@@ -135,16 +122,18 @@ spec:
         image: $DOCKER_IMAGE_NAME:$BUILD_NUMBER
         ports:
         - containerPort: 8080
-Click Commit new file at the bottom of the page.
+```
 
-Add a stage to the Jenkinsfile to perform the deployment to the Kubernetes cluster
-Click Jenkinsfile to configure this file. Click the Edit icon in the top-right of this window.
+- Click Commit new file at the bottom of the page.
 
-At the top of this file, be sure to change the following line to use your Docker Hub username instead of the instructor's:
+- Add a stage to the Jenkinsfile to perform the deployment to the Kubernetes cluster
+- Click Jenkinsfile to configure this file. Click the Edit icon in the top-right of this window.
+
+- At the top of this file, be sure to change the following line to use your Docker Hub username instead of the instructor's:
 
 DOCKER_IMAGE_NAME = "willbla/train-schedule"
 At the bottom of this file, replace the DeployToProduction section with the following:
-
+```
         stage('DeployToProduction') {
             when {
                 branch 'master'
@@ -161,20 +150,19 @@ At the bottom of this file, replace the DeployToProduction section with the foll
         }
     }
 }
-Click Commit changes at the bottom of the page.
+```
+- Click Commit changes at the bottom of the page.
 
-Run the build and successfully deploy the app to the cluster
-Back in the Jenkins tab in your browser, navigate to the train-schedule app and click master to show the master branch.
+- Run the build and successfully deploy the app to the cluster
+- Back in the Jenkins tab in your browser, navigate to the train-schedule app and click master to show the master branch.
 
-Click Build Now in the menu on the left of the page.
+- Click Build Now in the menu on the left of the page.
 
-When your deployment reaches the DeployToProduction stage, be sure to hover over the blue box and click Proceed to approve the push to production.
+- When your deployment reaches the DeployToProduction stage, be sure to hover over the blue box and click Proceed to approve the push to production.
 
-Verify everything is working by accessing the app in your browser
-On the hands-on lab page, copy the Kubernetes Node Public IP, open a new tab in your browser, and navigate to that IP address, using port 8080:
+- Verify everything is working by accessing the app in your browser
+- On the hands-on lab page, copy the Kubernetes Node Public IP, open a new tab in your browser, and navigate to that IP address, using port 8080:`<KUBERNETES_NODE_PUBLIC_IP>;:8080`
+- The application page should load and you should see the text "Find your train!".
 
-<KUBERNETES_NODE_PUBLIC_IP>;:8080
-The application page should load and you should see the text "Find your train!".
-
-Conclusion
-Congratulations, you've completed this hands-on lab!
+- Conclusion
+- Congratulations, you've completed this hands-on lab!
